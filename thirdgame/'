@@ -1,0 +1,95 @@
+
+
+local width, height = love.graphics.getDimensions()
+
+local radius = 5
+local count = 10
+local numChains = 5
+
+
+function mkChain()
+  local bodies   = {}
+  local shapes   = {}
+  local fixtures = {}
+  local joints   = {}
+
+  local xs = {}
+  local ys = {}
+
+  for i = 1, count do
+    xs[i] = width/2 + count * i * 2
+
+    ys[i] = height/2 + count * i * 2
+
+    bodies[i]  = love.physics.newBody(world, xs[i], ys[i], "dynamic")
+
+    shapes[i]  = love.physics.newCircleShape(radius)
+
+    fixtures[i] = love.physics.newFixture(bodies[i], shapes[i])
+
+    if i ~= 1 then
+      joints[i] = love.physics.newRopeJoint(bodies[i], bodies[i-1], xs[i], ys[i], xs[i-1], ys[i-1], 20, false)
+    end
+  end
+
+  return bodies
+end
+
+function love.update(dt)
+  for i = 1, numChains
+  mouseJoint:setTarget(love.mouse.getPosition())
+
+  local positions = {}
+  for i = 1,count do
+    positions[(i - 1) * 2 + 1] = chain1[i]:getX()
+    positions[(i - 1) * 2 + 2] = chain1[i]:getY()
+  end
+
+  curve1 = love.math.newBezierCurve(unpack(positions))
+  curve2 = love.math.newBezierCurve(unpack(positions))
+  curve3 = love.math.newBezierCurve(unpack(positions))
+
+  world:update(dt)
+end
+
+function love.draw()
+  love.graphics.circle('fill', love.mouse.getX(), love.mouse.getY(), radius)
+
+  --for i = 1,count do
+  --  local body = bodies[i]
+  --  love.graphics.circle('fill', body:getX(), body:getY(), radius)
+  --end
+
+  --for i = 2,count do
+  --  local body = bodies[i]
+  --  local bodyPrev = bodies[i-1]
+  --  love.graphics.line(body:getX(), body:getY(), bodyPrev:getX(), bodyPrev:getY())
+  --end
+
+  local points = curve:render(count)
+  --for i = 1, (count - 1) do
+  --  --love.graphics.setLineWidth(1)
+  --  pos = (i - 1) * 2
+  --  love.graphics.line(points[pos + 1], points[pos + 2],
+  --                     points[pos + 3], points[pos + 4])
+  --  print(points[pos + 1], points[pos + 2],
+  --        points[pos + 3], points[pos + 4])
+  --  print(pos)
+  --end
+  --print("-------------")
+  love.graphics.line(points)
+
+end
+
+function love.load()
+  chains     = {}
+  mouseJoint = {}
+
+  world = love.physics.newWorld(0, 0)
+
+  for i = 1, numChains do
+    chains[i] = mkChain()
+    mouseJoints[i] = love.physics.newMouseJoint(chain[i][1], width/2, height/2)
+  end
+end
+
